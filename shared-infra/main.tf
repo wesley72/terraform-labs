@@ -1,5 +1,7 @@
 provider "aws" {
-  region = var.region
+      
+                region = var.aws_region
+
 }
 
 # VPC
@@ -31,7 +33,7 @@ resource "aws_internet_gateway" "shared_igw" {
 # Public Subnet
 resource "aws_subnet" "shared_subnet_public" {
   vpc_id                  = aws_vpc.shared_vpc.id
-  cidr_block              = var.public_subnet_cidr
+  cidr_block              = var.public_subnet_cidrs[0]
   availability_zone       = "ap-south-2a"
   map_public_ip_on_launch = true
 
@@ -47,7 +49,7 @@ resource "aws_subnet" "shared_subnet_public" {
 # Private Subnet
 resource "aws_subnet" "shared_subnet_private" {
   vpc_id            = aws_vpc.shared_vpc.id
-  cidr_block        = var.private_subnet_cidr
+  cidr_block        = var.private_subnet_cidrs[0]
   availability_zone = "ap-south-2b"
 
   tags = {
