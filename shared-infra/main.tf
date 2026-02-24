@@ -46,6 +46,23 @@ resource "aws_subnet" "shared_subnet_public" {
   }
 }
 
+resource "aws_subnet" "shared_subnet_public_2" {
+  vpc_id                  = aws_vpc.shared_vpc.id
+  cidr_block              = var.public_subnet_cidrs[1]
+  availability_zone       = "ap-south-2b"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name    = "tera-shared-subnet-public-2"
+    owner   = "wesley"
+    tera    = "shared"
+    purpose = "public-networking"
+    env     = "lab"
+  }
+}
+
+
+
 # Private Subnet
 resource "aws_subnet" "shared_subnet_private" {
   vpc_id            = aws_vpc.shared_vpc.id
@@ -60,6 +77,22 @@ resource "aws_subnet" "shared_subnet_private" {
     env     = "lab"
   }
 }
+
+
+resource "aws_subnet" "shared_subnet_private_2" {
+  vpc_id            = aws_vpc.shared_vpc.id
+  cidr_block        = var.private_subnet_cidrs[1]
+  availability_zone = "ap-south-2a"
+
+  tags = {
+    Name    = "tera-shared-subnet-private-2"
+    owner   = "wesley"
+    tera    = "shared"
+    purpose = "private-networking"
+    env     = "lab"
+  }
+}
+
 
 # Public Route Table
 resource "aws_route_table" "shared_public_rt" {
@@ -82,6 +115,12 @@ resource "aws_route_table" "shared_public_rt" {
 # Associate Public Subnet with Public Route Table
 resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.shared_subnet_public.id
+  #subnet_id = data.terraform_remote_state.shared.outputs.public_subnet_id
+  route_table_id = aws_route_table.shared_public_rt.id
+}
+
+resource "aws_route_table_association" "public_assoc_2" {
+  subnet_id      = aws_subnet.shared_subnet_public_2.id
   route_table_id = aws_route_table.shared_public_rt.id
 }
 
@@ -101,5 +140,10 @@ resource "aws_route_table" "shared_private_rt" {
 # Associate Private Subnet with Private Route Table
 resource "aws_route_table_association" "private_assoc" {
   subnet_id      = aws_subnet.shared_subnet_private.id
+  route_table_id = aws_route_table.shared_private_rt.id
+}
+
+resource "aws_route_table_association" "private_assoc_2" {
+  subnet_id      = aws_subnet.shared_subnet_private_2.id
   route_table_id = aws_route_table.shared_private_rt.id
 }
