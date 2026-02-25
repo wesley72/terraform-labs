@@ -1,9 +1,6 @@
 name: Terraform S3 Lab Pipeline
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
@@ -12,9 +9,9 @@ jobs:
   validate-dev:
     runs-on: ubuntu-latest
     env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ap-south-2
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-2
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -22,53 +19,45 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
+      - name: Verify AWS Identity (Dev)
+        run: aws sts get-caller-identity
+
       - name: Terraform Init (Dev)
         run: terraform init
-        working-directory: labs/lab2-s3-bucket
-
-      - name: Terraform Validate (Dev)
-        run: terraform validate
         working-directory: labs/lab2-s3-bucket
 
       - name: Terraform Plan (Dev)
         run: terraform plan -var-file=dev.tfvars
         working-directory: labs/lab2-s3-bucket
 
-      - name: Terraform Apply (Dev)
-        if: github.event_name == 'pull_request'
-        run: terraform apply -auto-approve -var-file=dev.tfvars
-        working-directory: labs/lab2-s3-bucket
-
-    apply-prod:
-       needs: validate-prod
+  apply-prod:
+    needs: validate-dev
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     environment:
-       name: production   # approval gate
-      env:
-         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-         AWS_DEFAULT_REGION: ap-south-2
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      name: production   # approval gate
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
 
-    - name: Verify AWS Identity (Prod)
-      run: aws sts get-caller-identity
+      - name: Verify AWS Identity (Prod)
+        run: aws sts get-caller-identity
 
-    - name: Terraform Init (Prod)
-      run: terraform init
-      working-directory: labs/lab2-s3-bucket
+      - name: Terraform Init (Prod)
+        run: terraform init
+        working-directory: labs/lab2-s3-bucket
 
-    - name: Terraform Plan (Prod)
-      run: terraform plan -var-file=prod.tfvars
-      working-directory: labs/lab2-s3-bucket
+      - name: Terraform Plan (Prod)
+        run: terraform plan -var-file=prod.tfvars
+        working-directory: labs/lab2-s3-bucket
 
-    - name: Terraform Apply (Prod)
-      run: terraform apply -auto-approve -var-file=prod.tfvars
-      working-directory: labs/lab2-s3-bucket
-        
-
+      - name: Terraform Apply (Prod)
+        run: terraform apply -auto-approve -var-file=prod.tfvars
+        working-directory: labs/lab2-s3-bucket
