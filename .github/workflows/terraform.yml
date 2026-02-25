@@ -59,3 +59,8 @@ jobs:
       - name: Terraform Apply (Prod)
         run: terraform apply -auto-approve -var-file=prod.tfvars
         working-directory: labs/lab2-s3-bucket
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-south-2
+
