@@ -40,7 +40,7 @@ jobs:
         working-directory: labs/lab2-s3-bucket
 
     apply-prod:
-       needs: validate-dev
+       needs: validate-prod
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     environment:
